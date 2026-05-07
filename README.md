@@ -82,6 +82,19 @@ kubectl create configmap jmeter-test-plan --from-file=test.jmx=./your-test-plan.
 kubectl apply -f k8s/jmeter-job.yaml
 ```
 
+## Resource limits
+
+JMeter can be memory- and CPU-intensive. Setting resource limits prevents a single test run from starving other workloads.
+
+The recommended defaults (used throughout this guide) are:
+
+| Resource | Request | Limit |
+|---|---|---|
+| CPU | `500m` (½ core) | `2000m` (2 cores) |
+| Memory | `512Mi` | `2Gi` |
+
+Adjust these values based on the number of threads and the duration of your test. As a rough guide, each 100 concurrent JMeter threads adds ~100 MB of heap. You can also set the JVM heap directly by passing `-JJVM_ARGS="-Xms512m -Xmx1536m"` to the test plan, or by setting `JVM_ARGS` as an environment variable.
+
 ## Use in GitHub Actions (CSV + HTML artifacts)
 
 Add a workflow file at `.github/workflows/load-test.yml`. The checkout step places your repository (including `tests/test.jmx`) under `/github/workspace`.
@@ -95,6 +108,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/pewpewlab/jemter-k8s:latest
+      # Limit the container to 2 CPUs and 2 GB of RAM to prevent resource hogging
+      options: "--cpus 2 --memory 2g --memory-swap 2g"
     steps:
       - uses: actions/checkout@v4
 
@@ -142,6 +157,12 @@ load_test:
     LOG_FILE: "$CI_PROJECT_DIR/results/jmeter.log"
     GENERATE_HTML_REPORT: "true"
     HTML_REPORT_DIR: "$CI_PROJECT_DIR/results/html-report"
+    # Resource limits for the Kubernetes executor (ignored by Docker executor).
+    # Adjust values to match your cluster capacity.
+    KUBERNETES_CPU_REQUEST: "500m"
+    KUBERNETES_CPU_LIMIT: "2000m"
+    KUBERNETES_MEMORY_REQUEST: "512Mi"
+    KUBERNETES_MEMORY_LIMIT: "2Gi"
   script:
     - mkdir -p "$CI_PROJECT_DIR/results"
     # Pass -J flags to override test plan properties without editing the .jmx file.
