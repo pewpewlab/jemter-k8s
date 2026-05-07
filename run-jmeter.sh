@@ -22,10 +22,7 @@ fi
 mkdir -p "$(dirname "$RESULTS_FILE")" "$(dirname "$LOG_FILE")"
 
 set -- -n -t "$TEST_PLAN" -l "$RESULTS_FILE" -j "$LOG_FILE" "$@"
-
-if [ "${RESULTS_FORMAT}" != "" ]; then
-  set -- "$@" "-Jjmeter.save.saveservice.output_format=${RESULTS_FORMAT}"
-fi
+set -- "$@" "-Jjmeter.save.saveservice.output_format=${RESULTS_FORMAT}"
 
 case "$(printf "%s" "${GENERATE_HTML_REPORT}" | tr "[:upper:]" "[:lower:]")" in
   1|true|yes|y)
