@@ -19,8 +19,11 @@ Put your test file in the container (for example by mounting a volume to `/tests
 The script also supports environment variables:
 
 - `TEST_PLAN` (default: `/tests/test.jmx`)
-- `RESULTS_FILE` (default: `/results/results.jtl`)
+- `RESULTS_FILE` (default: `/results/results.csv`)
 - `LOG_FILE` (default: `/results/jmeter.log`)
+- `RESULTS_FORMAT` (default: `csv`, optional: `xml`)
+- `GENERATE_HTML_REPORT` (default: `false`, set `true` to enable JMeter dashboard report)
+- `HTML_REPORT_DIR` (default: `/results/html-report`)
 
 ## Build image
 
@@ -34,6 +37,7 @@ docker build -t jemter-k8s:latest .
 docker run --rm \
   -v "$(pwd)/your-test-plan.jmx:/tests/your-test-plan.jmx:ro" \
   -v "$(pwd)/results:/results" \
+  -e GENERATE_HTML_REPORT=true \
   jemter-k8s:latest /tests/your-test-plan.jmx
 ```
 
@@ -49,4 +53,55 @@ kubectl create configmap jmeter-test-plan --from-file=test.jmx=./your-test-plan.
 
 ```bash
 kubectl apply -f k8s/jmeter-job.yaml
+```
+
+## Use in GitHub Actions (CSV + HTML artifacts)
+
+```yaml
+name: load-test
+on: [workflow_dispatch]
+
+jobs:
+  jmeter:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/pewpewlab/jemter-k8s:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run JMeter
+        run: /opt/run-jmeter.sh /github/workspace/tests/test.jmx
+        env:
+          RESULTS_FILE: /github/workspace/results/results.csv
+          LOG_FILE: /github/workspace/results/jmeter.log
+          GENERATE_HTML_REPORT: "true"
+          HTML_REPORT_DIR: /github/workspace/results/html-report
+      - name: Upload load test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-results
+          path: |
+            results/results.csv
+            results/jmeter.log
+            results/html-report/
+```
+
+## Use in GitLab CI (CSV + HTML artifacts)
+
+```yaml
+load_test:
+  image: ghcr.io/pewpewlab/jemter-k8s:latest
+  stage: test
+  script:
+    - /opt/run-jmeter.sh tests/test.jmx
+  variables:
+    RESULTS_FILE: "$CI_PROJECT_DIR/results/results.csv"
+    LOG_FILE: "$CI_PROJECT_DIR/results/jmeter.log"
+    GENERATE_HTML_REPORT: "true"
+    HTML_REPORT_DIR: "$CI_PROJECT_DIR/results/html-report"
+  artifacts:
+    when: always
+    paths:
+      - results/results.csv
+      - results/jmeter.log
+      - results/html-report/
 ```
