@@ -93,7 +93,7 @@ The recommended defaults (used throughout this guide) are:
 | CPU | `500m` (½ core) | `2000m` (2 cores) |
 | Memory | `512Mi` | `2Gi` |
 
-Adjust these values based on the number of threads and the duration of your test. As a rough guide, each 100 concurrent JMeter threads adds ~100 MB of heap. You can also set the JVM heap directly by passing `-JJVM_ARGS="-Xms512m -Xmx1536m"` to the test plan, or by setting `JVM_ARGS` as an environment variable.
+Adjust these values based on the number of threads and the duration of your test. As a rough guide, each 100 concurrent JMeter threads adds ~100 MB of heap. You can also control the JVM heap size by setting the `JVM_ARGS` environment variable before running the script, for example: `JVM_ARGS="-Xms512m -Xmx1536m" /opt/run-jmeter.sh tests/test.jmx`.
 
 ## Use in GitHub Actions (CSV + HTML artifacts)
 

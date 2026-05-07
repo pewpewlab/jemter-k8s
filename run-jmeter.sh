@@ -31,7 +31,7 @@ case "$(printf "%s" "${GENERATE_HTML_REPORT}" | tr "[:upper:]" "[:lower:]")" in
       exit 1
     fi
     case "${HTML_REPORT_DIR}" in
-      /*) ;;  # must be an absolute path
+      /*)  ;;  # absolute path - continue validation
       *)  echo "HTML_REPORT_DIR must be an absolute path: ${HTML_REPORT_DIR}" >&2; exit 1 ;;
     esac
     case "${HTML_REPORT_DIR}" in
