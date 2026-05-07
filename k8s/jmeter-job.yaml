@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: jmeter-stress-test
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: jmeter
+          image: ghcr.io/pewpewlab/jemter-k8s:latest
+          env:
+            - name: TEST_PLAN
+              value: /tests/test.jmx
+            - name: RESULTS_FILE
+              value: /results/results.jtl
+            - name: LOG_FILE
+              value: /results/jmeter.log
+          volumeMounts:
+            - name: tests
+              mountPath: /tests
+            - name: results
+              mountPath: /results
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: tests
+          configMap:
+            name: jmeter-test-plan
+        - name: results
+          emptyDir: {}
