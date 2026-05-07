@@ -14,14 +14,25 @@ spec:
             - name: TEST_PLAN
               value: /tests/test.jmx
             - name: RESULTS_FILE
-              value: /results/results.jtl
+              value: /results/results.csv
             - name: LOG_FILE
               value: /results/jmeter.log
+            - name: GENERATE_HTML_REPORT
+              value: "true"
+            - name: HTML_REPORT_DIR
+              value: /results/html-report
           volumeMounts:
             - name: tests
               mountPath: /tests
             - name: results
               mountPath: /results
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
           securityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
