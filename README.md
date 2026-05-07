@@ -22,7 +22,7 @@ The script also supports environment variables:
 - `RESULTS_FILE` (default: `/results/results.csv`)
 - `LOG_FILE` (default: `/results/jmeter.log`)
 - `RESULTS_FORMAT` (default: `csv`, optional: `xml`)
-- `GENERATE_HTML_REPORT` (default: `false`, set `true` to enable JMeter dashboard report)
+- `GENERATE_HTML_REPORT` (default: `false`; enable with `true`, `1`, `yes`, or `y`)
 - `HTML_REPORT_DIR` (default: `/results/html-report`)
 
 ## Build image
