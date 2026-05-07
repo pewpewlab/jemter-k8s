@@ -26,8 +26,22 @@ set -- "$@" "-Jjmeter.save.saveservice.output_format=${RESULTS_FORMAT}"
 
 case "$(printf "%s" "${GENERATE_HTML_REPORT}" | tr "[:upper:]" "[:lower:]")" in
   1|true|yes|y)
-    if [ "${HTML_REPORT_DIR}" = "/" ] || [ "${HTML_REPORT_DIR}" = "" ]; then
-      echo "Invalid HTML report directory: ${HTML_REPORT_DIR}" >&2
+    if [ -z "${HTML_REPORT_DIR}" ]; then
+      echo "HTML_REPORT_DIR must not be empty" >&2
+      exit 1
+    fi
+    case "${HTML_REPORT_DIR}" in
+      /*) ;;  # must be an absolute path
+      *)  echo "HTML_REPORT_DIR must be an absolute path: ${HTML_REPORT_DIR}" >&2; exit 1 ;;
+    esac
+    case "${HTML_REPORT_DIR}" in
+      *..*)
+        echo "HTML_REPORT_DIR must not contain '..': ${HTML_REPORT_DIR}" >&2
+        exit 1
+        ;;
+    esac
+    if [ "${HTML_REPORT_DIR}" = "/" ]; then
+      echo "HTML_REPORT_DIR must not be the root directory" >&2
       exit 1
     fi
     rm -rf "${HTML_REPORT_DIR}"
